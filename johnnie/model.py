@@ -69,7 +69,7 @@ class AbstractModel(DeclarativeBase):
         return cls(**data)
 
     def apply_from_dict(self, data):
-        for k, v in data.items():
+        for k, v in list(data.items()):
             setattr(self, k, v)
         return self
 
@@ -111,7 +111,7 @@ class AbstractModel(DeclarativeBase):
     def execute(cls, *args, **kwargs):
         try:
             return cls.session().execute(*args, **kwargs)
-        except Exception, err:
+        except Exception as err:
             raise OperationException(err.message)
 
     def insert(self, with_commit=True):
@@ -120,7 +120,7 @@ class AbstractModel(DeclarativeBase):
             session.add(self)
             if with_commit:
                 session.commit()
-        except Exception, err:
+        except Exception as err:
             raise OperationException(err.message)
         finally:
             session.expunge_all()
@@ -133,7 +133,7 @@ class AbstractModel(DeclarativeBase):
             session.bulk_save_objects(entities)
             if with_commit:
                 session.commit()
-        except Exception, err:
+        except Exception as err:
             cls.rollback()
             raise OperationException(err.message)
         finally:
@@ -145,7 +145,7 @@ class AbstractModel(DeclarativeBase):
             object_session = session.object_session(self)
             try:
                 object_session.commit()
-            except Exception, err:
+            except Exception as err:
                 session.rollback()
                 raise OperationException(err.message)
             finally:
@@ -167,7 +167,7 @@ class AbstractModel(DeclarativeBase):
             if with_commit and self.is_persistent:
                 object_session.delete(self)
                 object_session.commit()
-        except Exception, err:
+        except Exception as err:
             session.rollback()
             raise OperationException(err.message)
         finally:
